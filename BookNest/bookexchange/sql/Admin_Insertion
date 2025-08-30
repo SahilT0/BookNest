@@ -1,0 +1,13 @@
+This file is not code it is for storing a copy of sql file which already executed in mysql workbench.
+
+-- Intial insertion
+
+insert into roles(name) values ('BUYER'), ('SELLER'), ('ADMIN');
+
+insert into users(fullname, email, password_hash) 
+values ('Sahil Tuli', 'sahil9416330821@gmail.com', '$2a$10$P6oarudJLoSHgkYFtHPz4OqrpMlWDBv0rU.KtiDdrA7W9VcK1go8W');
+
+insert into user_roles(user_id, role_id) select u.id, r.id from users u , roles r
+where u.email='sahil9416330821@gmail.com' and r.name='ADMIN';
+
+select * from user_roles;

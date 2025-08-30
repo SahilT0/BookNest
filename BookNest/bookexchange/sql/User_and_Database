@@ -1,0 +1,6 @@
+This file is not code it is for storing a copy of sql file which already executed in mysql workbench.
+
+create database bookexchange default character set utf8mb4;
+create user 'bookx_user'@'localhost' identified by 'booknest3712' ;
+grant all privileges on bookexchange.* to 'bookx_user'@'localhost';
+flush privileges;

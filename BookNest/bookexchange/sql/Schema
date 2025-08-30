@@ -1,0 +1,146 @@
+This file is not code it is for storing a copy of sql file which already executed in mysql workbench.
+
+use bookexchange;
+
+-- Roles
+create table roles (
+   id bigint primary key auto_increment,
+   name varchar(20) unique not null -- buyer , seller , admin
+   );
+   
+-- Users
+create table users (
+    id bigint primary key auto_increment,
+    fullname varchar(100) not null,
+    email varchar(100) not null unique,
+    phone varchar(20) unique,
+    password_hash varchar(255) not null,
+    active boolean not null default true,
+    created_at timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp on update current_timestamp
+    );
+
+
+-- User roles
+create table user_roles (
+    user_id bigint not null,
+    role_id bigint not null,
+    primary key (user_id, role_id),
+    foreign key (user_id) references users(id) on delete cascade on update cascade,
+    foreign key (role_id) references roles(id) on delete cascade on update cascade
+    );
+    
+
+-- Addresses (shipping, pickup)
+create table addresses (
+    id bigint primary key auto_increment,
+    user_id bigint not null,
+    line1 varchar(150) not null,
+    line2 varchar(150),
+    city varchar(80) not null,
+    state varchar(80) not null,
+    postal_code varchar(20) not null,
+    country varchar(80) not null default 'India',
+    is_default boolean not null default false,
+    foreign key (user_id) references users(id) on delete cascade on update cascade
+    );
+
+
+-- Book Master (meta data)
+create table books(
+    id bigint primary key auto_increment,
+    title varchar(200) not null,
+    author varchar(150),
+    isbn varchar(20),
+    publisher varchar(120),
+    edition varchar(50),
+    language varchar(50),
+    category varchar(50),
+    description text,
+    unique key uk_books_isbn (isbn)
+);
+
+
+-- Book images
+create table book_images (
+    id bigint primary key auto_increment,
+ 	book_id bigint not null,
+    image_url varchar(255) not null,
+    foreign key (book_id) references books(id) on update cascade on delete cascade
+);
+
+
+-- Listings (sell or donate entries)
+create table listings (
+    id bigint primary key auto_increment,
+    book_id bigint not null,
+    seller_id bigint not null,   -- donor or seller 
+    listing_type varchar(10) not null,
+    condition_grade varchar(10),   -- NEW | LIKE_NEW | GOOD | FAIR | POOR 
+    price decimal(10,2),
+    quantity int not null default 1,
+    status varchar(12) not null default 'ACTIVE' ,    -- Active ||  Paused  || Sold Out ||  Removed
+    created_at timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp on update current_timestamp,
+    check (listing_type in ('NEW', 'OLD', 'DONATION')),
+    check (status in ('ACTIVE', 'PAUSED', 'SOLD_OUT', 'REMOVED')),
+    foreign key (book_id) references books(id) on delete restrict on update cascade,
+    foreign key (seller_id) references users(id) on delete restrict on update cascade
+);
+
+
+-- Listing type ('NEW', 'OLD', 'DONATION')
+create index idx_listings_book on listings(book_id);
+create index idx_listings_type_status on listings(listing_type, status);
+
+
+-- Orders Purchase or Donation assignment
+create table orders (
+    id bigint primary key auto_increment,
+    buyer_id bigint not null,
+    order_type varchar(10) not null,
+    status varchar(12) not null default 'PENDING',
+    total_amount decimal(10, 2) not null default 0.00,
+    shipping_address_id bigint,
+    notes varchar(255),
+    created_at timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp on update current_timestamp,
+    check (order_type in ('PURCHASE', 'DONATION')),
+    check (status in ('PENDING', 'APPROVED', 'PAID', 'PACKED', 'SHIPPED', 'DELIVERED', 'CANCELLED')),
+    foreign key (buyer_id) references users(id) on delete restrict on update cascade,
+    foreign key (shipping_address_id) references addresses(id) on delete set null on update cascade
+);
+    
+create index idx_orders_buyer on orders(buyer_id, status);
+
+
+-- Orders Items 
+create table order_items (
+    id bigint primary key auto_increment,
+    order_id bigint not null,
+    listing_id bigint not null,
+    quantity int not null default 1,
+    unit_price decimal(10, 2) not null default 0.00,
+    foreign key (order_id) references orders(id) on delete cascade on update cascade,
+    foreign key (listing_id) references listings(id) on delete restrict on update cascade
+);
+
+
+-- Donation Requests (queue for donated listings)
+create table donation_requests	(
+    id bigint primary key auto_increment,
+    listing_id bigint not null,    -- must be listing_type = Donation
+    requester_id bigint not null,
+    status varchar(15) not null default 'REQUESTED',  -- REQUESTED | APPROVED | REJECTED | FULFILLED | CANCELLED
+    admin_id bigint,
+    created_at timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp on update current_timestamp,
+    check (status in ('REQUESTED', 'APPROVED', 'REJECTED', 'FULFILLED', 'CANCELLED')),
+    foreign key (listing_id) references listings(id) on delete cascade on update cascade,
+    foreign key (requester_id) references users(id) on delete restrict on update cascade,
+    foreign key (admin_id) references users(id) on delete set null on update cascade
+);
+
+create index idx_donation_requests on donation_requests(listing_id, status);
+    
+show tables;
