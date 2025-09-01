@@ -40,5 +40,10 @@
 			<type>1</type>
 			<location>C:/Users/SAHIL/Downloads/er_diagram.jpg</location>
 		</link>
+		<link>
+			<name>docs/use_case_diagram.png</name>
+			<type>1</type>
+			<location>C:/Users/SAHIL/Downloads/use_case_diagram.png</location>
+		</link>
 	</linkedResources>
 </projectDescription>
