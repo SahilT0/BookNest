@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
+        /* (Styling same as previous code) */
         body, html {
             height: 100%;
             margin: 0;
@@ -54,7 +55,7 @@
             font-size: 0.95em;
             color: #fff9d1;
         }
-        input[type="text"], input[type="email"], input[type="password"], select {
+        input[type="text"], input[type="email"], input[type="password"] {
             padding: 12px 14px;
             font-size: 1em;
             border-radius: 8px;
@@ -64,17 +65,8 @@
             color: #222;
             transition: box-shadow 0.3s ease;
         }
-        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, select:focus {
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
             box-shadow: 0 0 12px 3px #ffd60a8a;
-        }
-        select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3fN3AF_fd01uO3NOwdShwHDPEeCvPGs0tpA&s");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 12px;
-            padding-right: 36px;
         }
         .btn-register {
             margin-top: 26px;
@@ -122,8 +114,8 @@
 <body>
     <div class="register-container" role="main">
         <h1>Create Account</h1>
-        <form id="registerForm" onsubmit="return validateRegister(event)">
-            <label for="fullname">Full Name</label>
+        <form id="registerForm" action="RegisterServlet" method="post">
+            <label for="fullname">Name</label>
             <input type="text" id="fullname" name="fullname" placeholder="Sahil Tuli" required>
 
             <label for="email">Email</label>
@@ -132,19 +124,17 @@
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter password" required minlength="6">
 
-            <label for="confirm-password">Confirm Password</label>
-            <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm password" required minlength="6">
+            <label for="contact">Contact</label>
+            <input type="text" id="contact" name="contact" placeholder="Phone Number" required pattern="^\d{10,15}$" title="Enter a valid phone number">
 
-            <label for="role">User Role</label>
-            <select id="role" name="role" required>
-                <option value="" disabled selected>Select role</option>
-                <option value="Admin">Admin</option>
-                <option value="Buyer">Buyer</option>
-                <option value="Seller">Seller</option>
-                <option value="Student">Student (Donation)</option>
-            </select>
+            <label for="address">Address</label>
+            <input type="text" id="address" name="address" placeholder="Flat/House No, Street, City" required>
 
-            <div class="error-msg" id="errorMsg"></div>
+            <div class="error-msg" id="errorMsg"
+                  style="<%= (request.getAttribute("error") != null || request.getAttribute("errors") != null) ? "display:block;" : "display:none;" %>">
+                  <%= (request.getAttribute("error") != null) ? request.getAttribute("error") : "" %>
+                  <%= (request.getAttribute("errors") != null) ? request.getAttribute("errors") : "" %>
+            </div>
 
             <button type="submit" class="btn-register">Register</button>
         </form>
@@ -153,52 +143,5 @@
             Already have an account? <a href="login.jsp">Login here</a>
         </div>
     </div>
-
-    <script>
-        function validateRegister(event) {
-            event.preventDefault();
-
-            const fullname = document.getElementById('fullname').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            const role = document.getElementById('role').value;
-            const errorMsg = document.getElementById('errorMsg');
-
-            errorMsg.style.display = 'none';
-
-            if (!fullname || !email || !password || !confirmPassword || !role) {
-                showError('Please fill in all fields.');
-                return false;
-            }
-
-            // Simple email regex for validation
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                showError('Please enter a valid email address.');
-                return false;
-            }
-
-            if (password.length < 6) {
-                showError('Password must be at least 6 characters.');
-                return false;
-            }
-
-            if (password !== confirmPassword) {
-                showError('Passwords do not match.');
-                return false;
-            }
-
-            // Validation passed - you can submit the form or handle with JS
-            alert('Registration form is valid. Implement backend integration.');
-            return false;
-        }
-
-        function showError(message) {
-            const errorMsg = document.getElementById('errorMsg');
-            errorMsg.textContent = message;
-            errorMsg.style.display = 'block';
-        }
-    </script>
 </body>
 </html>

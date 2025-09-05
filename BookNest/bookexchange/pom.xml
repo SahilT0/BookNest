@@ -44,6 +44,34 @@
         <artifactId>jbcrypt</artifactId>
         <version>0.4</version>
     </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
+    <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>6.0.0.Alpha7</version>
+    </dependency>
+ 
+    <!-- MySQL JDBC Driver -->
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>8.0.29</version>
+    </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/net.sf.ehcache/ehcache -->
+    <dependency>
+        <groupId>net.sf.ehcache</groupId>
+        <artifactId>ehcache</artifactId>
+        <version>2.10.9.2</version>
+    </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-ehcache -->
+    <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-ehcache</artifactId>
+        <version>6.0.0.Alpha7</version>
+    </dependency>
 
 </dependencies>
 
