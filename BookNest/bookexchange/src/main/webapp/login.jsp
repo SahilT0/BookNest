@@ -139,7 +139,7 @@
    <div class="login-container" role="main">
        <h1>Login to BOOKNEST</h1>
        
-       <form name="loginForm" onsubmit="return validateLogin()" action="#" method="post" >
+       <form name="loginForm" action="LoginServlet" method="post" >
             
             <label for="email">Email address</label>
             <input type="email" id="email" name="email" placeholder="you@example.com" required="required" autofocus="autofocus">
