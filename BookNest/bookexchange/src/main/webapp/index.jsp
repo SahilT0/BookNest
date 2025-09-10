@@ -463,7 +463,7 @@
             </div>
             
             <div class="nav-links" id="menuLinks">
-                <a href="Login.jsp"><i class="fas fa-sign-in-alt nav-icon"></i>LOGIN</a>
+                <a href="login.jsp"><i class="fas fa-sign-in-alt nav-icon"></i>LOGIN</a>
                 <a href="register.jsp"><i class="fas fa-user-plus nav-icon"></i>REGISTER</a>
             </div>
             

@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import DAO.UserDao;
 import model.User;
@@ -30,7 +31,7 @@ public class LoginServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 //		doGet(request, response);
 		
-		String email = request.getParameter("email");
+		String email = request.getParameter("email").toLowerCase();
 		String password = request.getParameter("password");
 		
 		if(email.isEmpty() && password.isEmpty()) {
@@ -40,19 +41,31 @@ public class LoginServlet extends HttpServlet {
 			request.setAttribute("error", "Email is required!.");
 			request.getRequestDispatcher("login.jsp").forward(request, response);
 		}else if(password.isEmpty()) {
-			request.setAttribute("email", "Password is required!");
+			request.setAttribute("error", "Password is required!");
 			request.getRequestDispatcher("login.jsp").forward(request, response);
 		}
 		
 		UserDao u1 = new UserDao();
 		User user = u1.findByEmail(email);
-		if(user != null && !PasswordUtil.checkPassword(password, user.getPassword_hash())) {
-			PrintWriter p = response.getWriter();
-			p.print("Loggedin");
+		if(user != null && PasswordUtil.checkPassword(password, user.getPassword_hash())) {			
+			HttpSession oldSession = request.getSession(false);
+			
+			if(oldSession != null) {
+				oldSession.invalidate();
+			} 
+			
+			HttpSession session = request.getSession(true);
+			session.setAttribute("user", user);
+			session.setMaxInactiveInterval(1*60);
+			
+			response.sendRedirect("profile.jsp");
+			
 		}else if(user == null){
 			request.setAttribute("error", "Invalid Email Id");
+			request.getRequestDispatcher("login.jsp").forward(request, response);;
 		}else {
 			request.setAttribute("error", "Password does not matches!");
+			request.getRequestDispatcher("login.jsp").forward(request, response);
 			
 		}
 	}

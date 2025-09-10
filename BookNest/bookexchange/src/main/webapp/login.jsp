@@ -147,7 +147,10 @@
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required="required">
             
-            <div class="error-msg" id="error-msg">Please enter a valid email and password.</div>
+            <div class="error-msg" id="error-msg"
+                 style="<%= (request.getAttribute("error") != null || request.getAttribute("errors") != null) ? "display:block;" : "display:none;" %>">
+                  <%= (request.getAttribute("error") != null) ? request.getAttribute("error") : "" %>
+            </div>
             
             <button class="btn-login" type="submit">Login</button>
             
