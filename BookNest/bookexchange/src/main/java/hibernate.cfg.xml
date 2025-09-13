@@ -15,5 +15,13 @@
           
           <mapping class="model.User"/>
           <mapping class="model.Roles"/>
+          <mapping class="model.Addresses"/>
+          <mapping class="model.Book_Images"/>
+          <mapping class="model.Book"/>
+          <mapping class="model.DonationRequest"/>
+          <mapping class="model.Listing"/>
+          <mapping class="model.Order_items"/>
+          <mapping class="model.Order"/>
+          
      </session-factory>
 </hibernate-configuration>

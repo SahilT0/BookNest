@@ -2,17 +2,22 @@ package model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -49,6 +54,9 @@ public class Order {
 	@ManyToOne
 	@JoinColumn(name = "shipping_address_id", foreignKey = @ForeignKey(name = "fk_orders_addresses"))
 	private Addresses address;
+	
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private List<Order_items> order_items = new ArrayList<>();
 	
 	@Column(length = 255)
 	private String notes;
@@ -107,6 +115,14 @@ public class Order {
 
 	public void setAddress(Addresses address) {
 		this.address = address;
+	}
+
+	public List<Order_items> getOrder_items() {
+		return order_items;
+	}
+
+	public void setOrder_items(List<Order_items> order_items) {
+		this.order_items = order_items;
 	}
 
 	public String getNotes() {

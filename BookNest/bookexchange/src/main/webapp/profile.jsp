@@ -12,6 +12,19 @@
     if (selectedRole != null && (selectedRole.equals("buyer") || selectedRole.equals("seller") || selectedRole.equals("donor"))) {
         activeRole = selectedRole; session.setAttribute("activeRole", activeRole);
     }
+    if ("buyer".equals(activeRole)) {
+        response.sendRedirect("buyerPortal.jsp");
+        return;
+    } else if ("seller".equals(activeRole)) {
+        response.sendRedirect("sellerPortal.jsp");
+        return;
+    } else if ("donor".equals(activeRole)) {
+        response.sendRedirect("donorPortal.jsp");
+    }else{
+    	response.sendRedirect("login.jsp");
+        return;
+    }
+
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -274,7 +287,10 @@ body {
                         <button class="buy-btn" type="button" onclick="alert('Buy feature coming soon!')">Buy</button>
                     </div>
                 </article>
+                
+                
             <% } %>
+            
             </section>
             <!-- PAGINATION (centered under the grid) -->
             <nav class="pagination" aria-label="Pagination navigation">
@@ -285,6 +301,12 @@ body {
                 <button>Next &raquo;</button>
             </nav>
         </div>
+        
+        <% 
+              String includePage = activeRole + "Portal.jsp";
+              RequestDispatcher rd = request.getRequestDispatcher(includePage);
+              rd.include(request, response);
+        %>  
     </div>
 </body>
 </html>
