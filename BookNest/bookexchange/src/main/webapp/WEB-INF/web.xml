@@ -1,37 +1,76 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                             http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
 
-<web-app>
   <display-name>Archetype Created Web Application</display-name>
+  
   <servlet>
-  	<servlet-name>RegisterServlet</servlet-name>
-  	<display-name>RegisterServlet</display-name>
-  	<description></description>
-  	<servlet-class>servlet.RegisterServlet</servlet-class>
+    <servlet-name>RegisterServlet</servlet-name>
+    <servlet-class>servlet.RegisterServlet</servlet-class>
   </servlet>
   <servlet>
-  	<servlet-name>LoginServlet</servlet-name>
-  	<display-name>LoginServlet</display-name>
-  	<description></description>
-  	<servlet-class>servlet.LoginServlet</servlet-class>
+    <servlet-name>LoginServlet</servlet-name>
+    <servlet-class>servlet.LoginServlet</servlet-class>
   </servlet>
   <servlet>
-  	<servlet-name>LogoutServlet</servlet-name>
-  	<display-name>LogoutServlet</display-name>
-  	<description></description>
-  	<servlet-class>servlet.LogoutServlet</servlet-class>
+    <servlet-name>LogoutServlet</servlet-name>
+    <servlet-class>servlet.LogoutServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>BuyerPortalServlet</servlet-name>
+    <servlet-class>servlet.BuyerPortalServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>BookService</servlet-name>
+    <servlet-class>servlet.BookService</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>BookController</servlet-name>
+    <servlet-class>servlet.BookController</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>OrderController</servlet-name>
+    <servlet-class>servlet.OrderController</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>ListingController</servlet-name>
+    <servlet-class>servlet.ListingController</servlet-class>
+  </servlet>
+  
   <servlet-mapping>
-  	<servlet-name>RegisterServlet</servlet-name>
-  	<url-pattern>/RegisterServlet</url-pattern>
+    <servlet-name>RegisterServlet</servlet-name>
+    <url-pattern>/RegisterServlet</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-  	<servlet-name>LoginServlet</servlet-name>
-  	<url-pattern>/LoginServlet</url-pattern>
+    <servlet-name>LoginServlet</servlet-name>
+    <url-pattern>/LoginServlet</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-  	<servlet-name>LogoutServlet</servlet-name>
-  	<url-pattern>/LogoutServlet</url-pattern>
+    <servlet-name>LogoutServlet</servlet-name>
+    <url-pattern>/LogoutServlet</url-pattern>
   </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>BuyerPortalServlet</servlet-name>
+    <url-pattern>/BuyerPortalServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>BookService</servlet-name>
+    <url-pattern>/BookService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>BookController</servlet-name>
+    <url-pattern>/BookController</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>OrderController</servlet-name>
+    <url-pattern>/OrderController</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ListingController</servlet-name>
+    <url-pattern>/ListingController</url-pattern>
+  </servlet-mapping>
+    
 </web-app>

@@ -1,7 +1,6 @@
 package servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -10,8 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import DAO.UserDao;
+import model.Roles;
 import model.User;
 import util.PasswordUtil;
+import util.hibernateUtil;
 
 //@WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
@@ -19,17 +20,9 @@ public class LoginServlet extends HttpServlet {
        
     public LoginServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-//		response.getWriter().append("Served at: ").append(request.getContextPath());
-	}
-
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-//		doGet(request, response);
 		
 		String email = request.getParameter("email").toLowerCase();
 		String password = request.getParameter("password");
@@ -45,7 +38,7 @@ public class LoginServlet extends HttpServlet {
 			request.getRequestDispatcher("login.jsp").forward(request, response);
 		}
 		
-		UserDao u1 = new UserDao();
+		UserDao u1 = new UserDao(hibernateUtil.getSessionFactory());
 		User user = u1.findByEmail(email);
 		if(user != null && PasswordUtil.checkPassword(password, user.getPassword_hash())) {			
 			HttpSession oldSession = request.getSession(false);
@@ -56,7 +49,30 @@ public class LoginServlet extends HttpServlet {
 			
 			HttpSession session = request.getSession(true);
 			session.setAttribute("user", user);
-			session.setMaxInactiveInterval(1*60);
+			
+			Roles.Rolename primaryRole = user.getRoles().iterator().next().getName();
+			
+			session.setAttribute("roleName", primaryRole);
+			session.setAttribute("roleId", user.getRoles().iterator().next().getId());
+			session.setMaxInactiveInterval(60*30);
+			
+			switch(primaryRole) {
+			    case BUYER:
+			    	response.sendRedirect("buyerPortal");
+			    	return;
+		        case SELLER:
+		        	response.sendRedirect("sellerPortal.jsp");
+		        	return;
+		        case DONOR:
+		        	response.sendRedirect("donorPortal.jsp");
+		        	return;
+		        case ADMIN:
+		        	response.sendRedirect("adminPortal.jsp");
+		        	return;
+		   
+		        default:
+		        	response.sendRedirect("login.jsp");
+			}
 			
 			response.sendRedirect("profile.jsp");
 			

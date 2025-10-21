@@ -5,7 +5,7 @@ public class UserDTO {
 	private String email;
 	private String password;
 	private String phone;
-	
+	private String role;
 	
 	public String getFullname() {
 		return fullname;
@@ -31,4 +31,12 @@ public class UserDTO {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
+	public String getRole() {
+		return role;
+	}
+	public void setRole(String role) {
+		this.role = role;
+	}
+	
+	
 }

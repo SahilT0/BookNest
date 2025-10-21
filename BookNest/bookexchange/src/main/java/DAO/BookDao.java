@@ -7,125 +7,147 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import jakarta.persistence.NoResultException;
 import model.Book;
 
 public class BookDao {
-	
-	private final SessionFactory sessionfactory;
-	
-	public BookDao(SessionFactory sessionfactory) {
-		this.sessionfactory = sessionfactory;
-	}
-	
+
+    private final SessionFactory sessionFactory;
+
+    public BookDao(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+
     // Save or update a book
-	public void saveOrUpdate(Book book) {
-		Transaction tx = null;
-		try(Session session = sessionfactory.openSession()){
-			tx = session.beginTransaction();
-			session.saveOrUpdate(book);
-			tx.commit();
-		}catch (Exception e) {
-			if(tx != null) {
-				tx.rollback();
-			}
-			throw e;
-		}
-	}
-	
-	public Book findById(int id) {
-		try(Session session = sessionfactory.openSession()){
-			return session.get(Book.class, id);
-		}
-	}
-	
-	public List<Book> findAll(){
-		try(Session session = sessionfactory.openSession()){
-			Query<Book> query = session.createQuery("from book", Book.class);
-			return query.list();
-		}
-	}
-	
-	// Fetch books by Category
-	public List<Book> fetchBooksByCategory(String category){
-		try (Session session = sessionfactory.openSession()) {
+    public void saveOrUpdate(Book book) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            // MODERNIZED: merge() is the modern equivalent of saveOrUpdate()
+            session.merge(book);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw e;
+        }
+    }
+
+    public boolean addNewBook(Book book) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            // First, check if a book with this ISBN already exists
+            Book existingBook = fetchBooksByISBN(book.getIsbn());
+            if (existingBook != null) {
+                return false; // Book already exists
+            }
+            
+            transaction = session.beginTransaction();
+            // MODERNIZED: persist() is the modern equivalent of save()
+            session.persist(book);
+            transaction.commit();
+            return true;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw e;
+        }
+    }
+
+    public void deleteById(int id) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            Book book = session.get(Book.class, id);
+            if (book != null) {
+                // MODERNIZED: remove() is the modern equivalent of delete()
+                session.remove(book);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw e;
+        }
+    }
+
+    public void deleteByISBN(String isbn) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            // FIX: You must first find the book by ISBN, then delete it.
+            Book book = fetchBooksByISBN(isbn);
+            if (book != null) {
+                session.remove(book);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw e;
+        }
+    }
+
+    // --- READ-ONLY METHODS ---
+
+    public Book findById(int id) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.get(Book.class, id);
+        }
+    }
+
+    public List<Book> findAll() {
+        try (Session session = sessionFactory.openSession()) {
+            Query<Book> query = session.createQuery("FROM Book", Book.class);
+            // MODERNIZED: Use getResultList() instead of list()
+            return query.getResultList();
+        }
+    }
+
+    public List<Book> fetchBooksByCategory(String category) {
+        try (Session session = sessionFactory.openSession()) {
             String hql = "FROM Book WHERE category = :category";
             Query<Book> query = session.createQuery(hql, Book.class);
             query.setParameter("category", category);
-            return query.list();
+            return query.getResultList();
         }
-	}
-	
-	// Fetch books by author
-	public List<Book> fetchBooksByAuthor(String author){
-		try(Session session = sessionfactory.openSession()){
-			String hql = "From Book where author = :author";
-			Query<Book> query = session.createQuery(hql, Book.class);
-			query.setParameter("author", author);
-			return query.list();
-		}
-	}
-	
-	public Book fetchBooksByISBN(String isbn){
-		try(Session session = sessionfactory.openSession()){
-			String hql = "From Book where isbn = :isbn";
-			Query<Book> query = session.createQuery(hql, Book.class);
-			query.setParameter("isbn", isbn);
-			return query.uniqueResult();
-		}
-	}
-	
-	public boolean addNewBook(Book book) {
-		Transaction tx = null;
-		try(Session session = sessionfactory.openSession()){
-			Query<Book> query = session.createQuery("From Book where isbn = :isbn", Book.class);
-			query.setParameter("isbn", book.getIsbn());
-			if(query.uniqueResult() != null) {
-					return false;
-			}
-			tx = session.beginTransaction();
-			session.save(book);
-			tx.commit();
-			return true;
-		}catch (Exception e) {
-			if(tx != null) {
-				tx.rollback();
-			}
-			throw e;
-		}
-	}
-	
-	public void deleteById(int id) {
-		Transaction tx = null;
-		try(Session session = sessionfactory.openSession()){
-			tx = session.beginTransaction();
-			Book book = session.get(Book.class, id);
-			if(book != null) {
-				session.delete(book);
-			}
-			tx.commit();
-		}catch (Exception e) {
-			if (tx != null) {
-				tx.rollback();
-			}
-			throw e;
-		}
-	}
-	
-	public void deleteByISBN(String isbn) {
-		Transaction tx = null;
-		try(Session session = sessionfactory.openSession()){
-			tx = session.beginTransaction();
-			Book book = session.get(Book.class, isbn);
-			if(book != null) {
-				session.delete(book);
-			}
-			tx.commit();
-		}catch(Exception exp) {
-			if(tx != null) {
-				tx.rollback();
-			}
-			throw exp;
-		}
-	}
-	
+    }
+
+    public List<Book> fetchBooksByAuthor(String author) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "FROM Book WHERE author = :author";
+            Query<Book> query = session.createQuery(hql, Book.class);
+            query.setParameter("author", author);
+            return query.getResultList();
+        }
+    }
+
+    public Book fetchBooksByISBN(String isbn) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "FROM Book WHERE isbn = :isbn";
+            Query<Book> query = session.createQuery(hql, Book.class);
+            query.setParameter("isbn", isbn);
+            // MODERNIZED: Use getSingleResult() for one expected result.
+            try {
+                return query.getSingleResult();
+            } catch (NoResultException e) {
+                return null; // Return null if no book is found
+            }
+        }
+    }
+
+    // This method is used by your servlet to get image URLs for a specific book.
+    public List<String> findImageUrlsByBook(Book book) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT bi.imageUrl FROM BookImage bi WHERE bi.book.id = :bookId";
+            Query<String> query = session.createQuery(hql, String.class);
+            query.setParameter("bookId", book.getId());
+            return query.getResultList();
+        }
+    }
 }

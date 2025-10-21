@@ -55,7 +55,7 @@
             font-size: 0.95em;
             color: #fff9d1;
         }
-        input[type="text"], input[type="email"], input[type="password"] {
+        input[type="text"], input[type="email"], input[type="password"], select{
             padding: 12px 14px;
             font-size: 1em;
             border-radius: 8px;
@@ -65,7 +65,7 @@
             color: #222;
             transition: box-shadow 0.3s ease;
         }
-        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus , select{
             box-shadow: 0 0 12px 3px #ffd60a8a;
         }
         .btn-register {
@@ -123,7 +123,14 @@
 
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter password" required minlength="6">
-
+            
+            <label for="role">Select Role</label>
+                 <select id="role" name="role" required>
+                     <option value="BUYER">Buyer</option>
+                     <option value="SELLER">Seller</option>
+                     <option value="DONOR">Donor</option>
+                 </select>
+            
             <label for="contact">Contact</label>
             <input type="text" id="contact" name="contact" placeholder="Phone Number" required pattern="^\d{10,15}$" title="Enter a valid phone number">
 

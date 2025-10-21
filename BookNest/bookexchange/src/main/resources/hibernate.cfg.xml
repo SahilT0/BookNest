@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+     <session-factory>
+          <!-- Database Connection Settings -->
+          <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+          <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/bookexchange</property>
+          <property name="hibernate.connection.username">bookx_user</property>
+          <property name="hibernate.connection.password">booknest3712</property>
+
+          <!-- SQL Dialect -->
+          <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
+
+          <!-- Debugging & Schema Management -->
+          <property name="hibernate.show_sql">true</property>
+          <property name="hibernate.format_sql">true</property>
+          <property name="hibernate.hbm2ddl.auto">validate</property>
+          <property name="hibernate.use_sql_comments">true</property>
+
+          <!-- If you want Hibernate logging at DEBUG level, that is set in log4j/logback, 
+               not in this XML. I’ll guide you separately for that. -->
+
+          <!-- Mapped Entities -->
+          <mapping class="model.User"/>
+          <mapping class="model.Roles"/>
+          <mapping class="model.Addresses"/>
+          <mapping class="model.BookImage"/>
+          <mapping class="model.Book"/>
+          <mapping class="model.DonationRequest"/>
+          <mapping class="model.Listing"/>
+          <mapping class="model.OrderItem"/>
+          <mapping class="model.Order"/>
+          <mapping class="model.Cart"/>
+          <mapping class="model.CartItems"/>
+          
+     </session-factory>
+</hibernate-configuration>

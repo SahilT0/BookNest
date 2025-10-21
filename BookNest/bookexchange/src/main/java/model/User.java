@@ -4,17 +4,19 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name="users", uniqueConstraints = {
@@ -25,7 +27,7 @@ public class User {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private Long id;
 	
 	@Column(length = 100, nullable = false)
 	private String fullname;
@@ -55,6 +57,17 @@ public class User {
 			)
 	private Set<Roles> roles = new HashSet<>();
 	
+	@PrePersist
+	protected void onCreate() {
+	    createdAt = LocalDateTime.now();
+	    updatedAt = LocalDateTime.now();
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+	    updatedAt = LocalDateTime.now();
+	}
+	
 	public String getPhone() {
 		return phone;
 	}
@@ -67,12 +80,15 @@ public class User {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
-	public int getId() {
+	
+	public Long getId() {
 		return id;
 	}
-	public void setId(int id) {
+
+	public void setId(Long id) {
 		this.id = id;
 	}
+
 	public String getFullname() {
 		return fullname;
 	}

@@ -1,36 +1,35 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="model.User"%>
 <%@ page import="java.util.*" %>
 <%
+
     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     User user = (User) session.getAttribute("user");
     if (user == null) {
-        response.sendRedirect("login.jsp"); return;
+        response.sendRedirect("login.jsp");
+        return;
     }
     String activeRole = (String) session.getAttribute("activeRole");
-    if (activeRole == null) { activeRole = "buyer"; session.setAttribute("activeRole", activeRole); }
+    if (activeRole == null) {
+        activeRole = "buyer";
+        session.setAttribute("activeRole", activeRole);
+    }
+    // Handle role selection and redirect to corresponding portal immediately
     String selectedRole = request.getParameter("role");
-    if (selectedRole != null && (selectedRole.equals("buyer") || selectedRole.equals("seller") || selectedRole.equals("donor"))) {
-        activeRole = selectedRole; session.setAttribute("activeRole", activeRole);
-    }
-    if ("buyer".equals(activeRole)) {
-        response.sendRedirect("buyerPortal.jsp");
-        return;
-    } else if ("seller".equals(activeRole)) {
-        response.sendRedirect("sellerPortal.jsp");
-        return;
-    } else if ("donor".equals(activeRole)) {
-        response.sendRedirect("donorPortal.jsp");
-    }else{
-    	response.sendRedirect("login.jsp");
+    if (selectedRole != null && (selectedRole.equals("buyer") || selectedRole.equals("seller") 
+            || selectedRole.equals("donor") || selectedRole.equals("admin"))) {
+        activeRole = selectedRole;
+        session.setAttribute("activeRole", selectedRole);
+        response.sendRedirect(selectedRole + "Portal");
         return;
     }
-
+    String bookType = request.getParameter("type");
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Profile - BOOKNEST</title>
+<title>PROFILE - BOOKNEST</title>
 <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgHHZaCTnqvfR92rclgqHcVWHAaCXSDZSZ5g&s" />
 <style>
 body {
@@ -41,175 +40,421 @@ body {
 }
 /* ------------ NAVBAR ------------ */
 .navbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 15px 38px; background: #263266; color: #fff;
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    padding: 15px 38px; 
+    background: #263266; 
+    color: #fff;
     box-shadow: 0 1px 10px 0 rgba(40,53,147,0.08);
     position: relative;
 }
-.logo {font-weight:800;font-size:1.6em;color:#ffd600;letter-spacing:2px;}
-.navbar-center {
-    position: absolute;
-    left: 50%;
-    top: 0; bottom: 0;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center; height: 100%;
-    width: 480px;
-    z-index: 1;
+.logo {
+    font-weight: 800;
+    font-size: 1.6em;
+    color: #ffd600;
+    letter-spacing: 2px;
 }
-.search-bar-large {
-    width: 100%; max-width: 100%; padding: 13px 22px; font-size: 1.13rem;
-    border-radius: 8px; border: none; outline: none; background: #fff;
-    box-shadow: 0 2px 12px #28359318;
-}
-.navbar-controls {
+/* Left side: book filter buttons */
+.navbar-left {
     display: flex;
     align-items: center;
-    gap: 13px;
-    margin-left: 18px;
+    gap: 15px;
 }
-.role-selector {
-    background: #fff; color: #263266;
-    border-radius: 7px; border: none;
-    font-size: 1em; font-weight: 600;
-    padding: 7px 20px 7px 14px; margin-right: 4px;
-    box-shadow: 0 2px 6px #26326618;
-    cursor: pointer; appearance: none;
-    transition: box-shadow 0.2s;
-}
-.role-selector:focus {box-shadow: 0 0 0 2px #ffd60088;}
-.logout-btn {
-    background: linear-gradient(90deg, #ffd600 70%, #ffc107 100%);
-    color: #263266; border-radius:7px; border:none; font-weight:700; font-size:1em;
-    padding:8px 21px; cursor:pointer; box-shadow:0 3px 12px #ffd60020;
+.book-nav-btn {
+    background: none;
+    border: none;
+    color: #ffd600;
+    font-size: 1.05em;
+    font-weight: 600;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 0 0 10px 10px;
     transition: background 0.2s, color 0.2s;
 }
-.logout-btn:hover { background:#ffef81;color:#111c37;}
-/* ------------ LAYOUT BODY ------------ */
-.page-row {
-    display: flex; justify-content: flex-start; align-items: flex-start; margin: 0 auto; padding: 30px 14px 0 14px;
-    max-width: 1300px; min-height: calc(100vh - 78px);
-    gap:32px;
+.book-nav-btn.active, .book-nav-btn:hover {
+    background: #ffd600;
+    color: #263266;
 }
-.sidebar {
-    width: 295px; min-width:250px; max-width:340px; flex-shrink:0;
-    display: flex; flex-direction: column; gap: 20px;
-    align-items: flex-start;
-    margin-left: 0.5rem;
+/* Right side: role selector and logout */
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
 }
-.profile-card, .filters-card {
-    background: #fff; border-radius: 18px; box-shadow: 0 6px 32px #28359317;
-    margin-bottom: 0; padding: 27px 16px 21px 16px;
+.role-selector {
+    background: #fff; 
+    color: #263266;
+    border-radius: 7px; 
+    border: none;
+    font-size: 1em; 
+    font-weight: 600;
+    padding: 7px 20px 7px 14px; 
+    cursor: pointer; 
+    box-shadow: 0 2px 6px #26326618;
+    transition: box-shadow 0.2s;
 }
-.profile-card { text-align: center;}
-.profile-avatar {
-    width: 72px; height: 72px; border-radius: 50%;
-    margin: 0 auto 12px auto;
-    background: linear-gradient(135deg,#dbeafe 60%,#e7f5ff 100%);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 2em; color: #263266; font-weight: bold;
+.role-selector:focus {
+    box-shadow: 0 0 0 2px #ffd60088;
 }
-.profile-details { margin-bottom: 13px; color:#283593;}
-.profile-details h2 { margin:0 0 13px 0; font-weight:800;}
-.profile-details span { display:block;margin:6px 0;font-size:1.01em;color:#56577e;}
-.profile-actions { margin-top:14px;}
-.profile-actions button {
-    margin: 0 7px 7px 7px; padding: 7px 17px; border-radius:7px; border:none;
-    font-weight:700; font-size:1em; background:#263266; color:#ffd600;
-    cursor:pointer; transition: background 0.2s,color 0.2s; box-shadow:0 2px 6px #2632660f;
-}
-.profile-actions button:hover { background:#ffd600;color:#192041;}
-.filters-card h3 { margin:0 0 9px 0; color:#283593;font-size:1.08em; }
-.filters-card ul {padding:0; margin:0 0 10px 0; list-style:none;}
-.filters-card li {margin-bottom:8px;}
-.filters-card label {cursor:pointer;user-select:none;}
-.filters-card input[type=checkbox] {margin-right:4px;accent-color:#283593;}
-.filter-row { display: flex; gap: 9px; margin-bottom:9px;}
-.filters-card input[type=number] {width:62px;padding:5px 7px;border-radius:6px;border:1px solid #ccc;}
-.filters-card select {border-radius:6px;padding:6px 10px;border:1px solid #ccc;font-size:1em;margin-top:7px;width:100%;}
-/* ------------- MAIN CONTENT ------------- */
-.main-content {flex:1 1 0px;min-width:0;display:flex;flex-direction:column;margin-left:0;}
-.sort-bar {display:flex;justify-content:flex-end;margin-bottom:14px;}
-.sort-bar select {border-radius:8px;padding:7px 13px;font-size:1em;border:1.5px solid #ccc;outline:none;}
-.book-grid {
-    display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
-    gap:26px; width:100%;
-}
-.book-card {
-    background: #fff; border-radius: 14px; box-shadow: 0 3px 15px #28359310;
-    overflow:hidden; display:flex;flex-direction:column;
-    padding-bottom: 17px; transition: transform 0.3s, box-shadow 0.3s;
-    min-height:355px;
-}
-.book-card:hover { transform:scale(1.04); box-shadow:0 8px 40px #28359324;}
-.book-cover { width:100%; height:168px; object-fit:contain; background:#f8f8f8; border-bottom:1px solid #f3f3f3;}
-.book-info { padding:11px 15px 2px 15px; flex-grow:1;display:flex;flex-direction:column;}
-.book-title {font-weight:700; color:#283593; font-size:1.08rem; margin-bottom:5px;}
-.book-author {font-style:italic; color:#666; font-size:0.97rem; margin-bottom:7px;}
-.book-price {font-weight:700; color:#fa6800; font-size:1.02rem;}
-.book-condition {font-weight:600; color:#283593cc; font-size:0.93rem; margin-bottom:10px;}
-.buy-btn {
-    background-color: #ffc107; border: none; border-radius: 11px;
-    padding: 8px 14px; font-weight: 700; font-size: 0.97rem; color: #283593; cursor: pointer;
-    margin-top: 8px; box-shadow: 0 4px 13px #f8b40b99; transition: background 0.3s;
-}
-.buy-btn:hover { background-color: #ffcd39;}
-/* -------- PAGINATION --------- */
-.pagination {
-    margin: 26px 0 17px 0;
+/* -------- PROFILE CARD -------- */
+.profile-card {
+    background: linear-gradient(135deg, #ffffff, #f9f9ff);
+    border-radius: 18px;
+    padding: 25px 20px;
     text-align: center;
-    user-select: none;
+    box-shadow: 0 6px 22px rgba(38, 50, 102, 0.15);
+    margin-bottom: 28px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.profile-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 35px rgba(38, 50, 102, 0.25);
+}
+.profile-avatar {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    background: #263266;
+    color: #ffd600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 auto 14px auto;
+    box-shadow: 0 4px 14px rgba(38, 50, 102, 0.25);
+}
+.profile-details h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 5px 0 10px 0;
+    color: #263266;
+}
+.profile-details span {
+    display: block;
+    font-size: 0.95rem;
+    color: #4a4e87;
+    margin-bottom: 4px;
+}
+.profile-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.profile-actions button {
+    background: #ffd600;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #263266;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(255, 214, 0, 0.35);
+    transition: background 0.2s, transform 0.2s;
+}
+.profile-actions button:hover {
+    background: #ffe876;
+    transform: translateY(-2px);
+}
+
+/* -------- FILTERS / CATEGORY CARD -------- */
+.filters-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 22px 20px;
+    box-shadow: 0 4px 20px rgba(38, 50, 102, 0.12);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.filters-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(38, 50, 102, 0.2);
+}
+.filters-card h3 {
+    font-size: 1.15rem;
+    font-weight: 750;
+    color: #263266;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #ffd60044;
+    padding-bottom: 6px;
+}
+.filters-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 15px 0;
+}
+.filters-card li {
+    margin-bottom: 8px;
+}
+.filters-card label {
+    font-size: 0.96rem;
+    color: #444a77;
+    cursor: pointer;
+}
+.filters-card input[type="checkbox"] {
+    margin-right: 7px;
+    accent-color: #ffd600;
+}
+.filter-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.filter-row input {
+    flex: 1;
+    border-radius: 8px;
+    border: 1.5px solid #ccc;
+    padding: 7px;
+    font-size: 0.95rem;
+}
+
+/* ---- MAIN LAYOUT/BOX ---- */
+.page-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin: 0 50px;
+    max-width: 2500px;
+    min-height: calc(100vh - 78px);
+    gap: 32px;
+    padding: 40px 20px 0 20px;        /* uniform and more generous spacing */
+    background: #f6f7fb;
+}
+
+.main-content {
+    flex: 1 1 0px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    margin-left: 100px;
+    padding: 30px 22px 32px 22px;     /* internal padding for breathing room */
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px #28359313;
+    min-height: 720px;                /* keeps content box tall even with few books */
+}
+
+/* Sort Bar for compactness/highlight */
+.sort-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 18px;
+}
+.sort-bar select {
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-size: 1em;
+    border: 1.5px solid #ccc;
+    outline: none;
+    background: #f4f4fd;
+}
+
+/* ---- BOOKS GRID ---- */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 27px;                       /* increased gap for breathing room */
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.book-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 22px 0 #28359313, 0 1.5px 4px #5a649e13;
+    display: flex;
+    flex-direction: column;
+    min-height: 340px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    padding-bottom: 12px;
+    overflow: hidden;
+    border: 1px solid #ebecff;
+    position: relative;
+}
+.book-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 40px #26326628;
+    border-color: #ffd600;
+}
+.book-cover {
+    width: 100%;
+    height: 160px;
+    object-fit: contain;
+    background: #f8f8f8;
+    border-bottom: 1px solid #f3f3f3;
+}
+.book-info {
+    padding: 13px 16px 0 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.book-title {
+    color: #263266;
+    font-size: 1.14rem;
+    font-weight: 750;
+    margin-bottom: 4px;
+    line-height: 1.27;
+    height: 38px; overflow: hidden;
+}
+.book-author {
+    font-style: italic;
+    color: #58598d;
+    font-size: 1rem; margin-bottom: 4px;
+    height: 24px; overflow: hidden;
+}
+.book-price {
+    font-weight: 700;
+    color: #fa6800;
+    font-size: 1.09rem;
+    margin-top: 3px;
+}
+.book-condition {
+    font-weight: 600;
+    color: #283593b0;
+    font-size: 0.99rem;
+    margin: 8px 0 0 0;
+}
+
+.buy-btn {
+    background: linear-gradient(90deg,#ffd600 70%,#ffc107 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 9px 0;
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: #1d216d;
+    cursor: pointer;
+    margin-top: auto;
+    box-shadow: 0 3px 12px #f8b40b56;
+    width: 100%;
+    transition: background 0.18s, color 0.22s;
+}
+.buy-btn:hover {
+    background: #ffe876;
+    color: #263266;
+}
+
+/* -------- PAGINATION -------- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 28px 0 10px 0;
 }
 .pagination button {
-    margin: 0 5px;
     border: none;
-    background: #283593cc;
-    color: #fff;
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px 14px;
     font-weight: 700;
-    font-size: 1.09rem;
-    padding: 8px 16px;
-    border-radius: 9px;
+    font-size: 0.95rem;
+    color: #263266;
+    box-shadow: 0 3px 10px rgba(38, 50, 102, 0.15);
     cursor: pointer;
-    transition: background 0.3s;
+    transition: background 0.2s, transform 0.2s, color 0.2s;
 }
-.pagination button:disabled { background: #aaa; cursor: not-allowed;}
-.pagination button:hover:not(:disabled) { background: #3f51b5; }
-/* ------------ RESPONSIVENESS ------------ */
+.pagination button:hover {
+    background: #ffd600;
+    color: #263266;
+    transform: translateY(-2px);
+}
+.pagination button.active {
+    background: #ffd600;
+    color: #1a1f4d;
+}
+.pagination button:disabled {
+    background: #ddd;
+    color: #888;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* -------- FOOTER -------- */
+.footer {
+    background-color: #222;   /* dark background */
+    color: #fff;              /* white text */
+    text-align: center;       /* center text */
+    padding: 15px 0;          /* spacing */
+    margin-top: 40px;         /* space above footer */
+    font-size: 14px;          /* neat size */
+    position: relative;       /* normal flow */
+    bottom: 0;
+    width: 100%;
+    border-top: 2px solid #444; /* subtle top border */
+}
+
+.footer p {
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+
+/* Responsive */
 @media (max-width:1100px) {
-    .navbar-center, .sidebar { position: static; left: unset; transform: none; width: 100%;}
-    .page-row{flex-direction:column;gap:16px;padding:22px 7px 0 7px;}
-    .main-content{width:99vw;}
+    .page-row, .sidebar, .main-content { flex-direction: column; }
+    .main-content { width: 100%; margin-left: 0; padding: 13px 5vw 32px 5vw;}
+    .sidebar { width: 100%; max-width: 100%; margin-left: 0;}
 }
-@media (max-width:600px){
-    .sidebar, .page-row, .main-content{flex-direction:column; gap: 8px;}
-    .profile-card, .filters-card { margin-bottom: 10px; }
+@media (max-width:700px){
     .book-grid { grid-template-columns: 1fr; }
-    .search-bar-large { width: 95vw; min-width: 135px;}
+    .main-content { padding: 12px 3vw 20px 3vw;}
 }
+
+.logout-btn {
+    background: linear-gradient(90deg, #ffd600 70%, #ffc107 100%);
+    color: #263266; 
+    border-radius: 7px; 
+    border: none; 
+    font-weight: 700; 
+    font-size: 1em;
+    padding: 8px 21px;
+    cursor: pointer; 
+    box-shadow: 0 3px 12px #ffd60020;
+    transition: background 0.2s, color 0.2s;
+}
+.logout-btn:hover {
+    background: #ffef81;
+    color: #111c37;
+}
+
+/* ------------- KEEP EXISTING YOUR CSS ------------- */
+/* Page row, sidebar, profile-card, main-content etc. assumed same */
+/* Keep your existing CSS here as you provided */
+
 </style>
 </head>
 <body>
     <!-- NAVBAR -->
     <div class="navbar">
-        <span class="logo">BOOKNEST</span>
-        <div class="navbar-center">
-            <form onsubmit="return false;" style="width:100%;margin:0;">
-                <input class="search-bar-large" type="search" id="searchInput" placeholder="Search by title, author, or ISBN" aria-label="Search books" />
+        <div class="navbar-left">
+            <span class="logo">BOOKNEST</span>
+            <form method="get" action="profile.jsp" style="display:flex;gap:8px; margin:0;">
+                <button type="submit" name="type" value="" class="book-nav-btn <%= (bookType==null||bookType.isEmpty())?"active":"" %>">All Books</button>
+                <button type="submit" name="type" value="NEW" class="book-nav-btn <%= "NEW".equals(bookType)?"active":"" %>">New Books</button>
+                <button type="submit" name="type" value="OLD" class="book-nav-btn <%= "OLD".equals(bookType)?"active":"" %>">Old Books</button>
+                <button type="submit" name="type" value="DONATION" class="book-nav-btn <%= "DONATION".equals(bookType)?"active":"" %>">Donated Books</button>
             </form>
         </div>
-        <div class="navbar-controls">
+        <div class="navbar-right">
             <form id="roleForm" method="get" action="profile.jsp" style="margin:0;">
                 <select id="roleSelect" name="role" class="role-selector" onchange="document.getElementById('roleForm').submit()">
                     <option value="buyer" <%= "buyer".equals(activeRole) ? "selected" : "" %>>Buyer</option>
                     <option value="seller" <%= "seller".equals(activeRole) ? "selected" : "" %>>Seller</option>
                     <option value="donor" <%= "donor".equals(activeRole) ? "selected" : "" %>>Donor</option>
+                    <option value="admin" <%= "admin".equals(activeRole) ? "selected" : "" %>>Admin</option>
                 </select>
             </form>
             <form id="logoutForm" action="<%= request.getContextPath() %>/LogoutServlet" method="post" style="display:inline;">
-                 <button type="submit" class="logout-btn">Logout</button>
+                <button type="submit" class="logout-btn">Logout</button>
             </form>
         </div>
     </div>
+
     <div class="page-row">
         <!-- --- SIDEBAR (Profile + Filters) --- -->
         <aside class="sidebar">
@@ -241,12 +486,6 @@ body {
                     <input type="number" placeholder="Min" min="0" />
                     <input type="number" placeholder="Max" min="0" />
                 </div>
-                <h3>Condition</h3>
-                <select>
-                    <option>All</option>
-                    <option>New</option>
-                    <option>Old</option>
-                </select>
             </div>
         </aside>
         <!-- --- MAIN BOOK CONTENT --- -->
@@ -257,7 +496,6 @@ body {
                     <option value="priceAsc">Price: Low to High</option>
                     <option value="priceDesc">Price: High to Low</option>
                     <option value="latest">Newest Arrivals</option>
-                    <option value="rating">Rating</option>
                 </select>
             </div>
             <section id="booksGrid" class="book-grid" aria-label="Book listings grid">
@@ -287,10 +525,7 @@ body {
                         <button class="buy-btn" type="button" onclick="alert('Buy feature coming soon!')">Buy</button>
                     </div>
                 </article>
-                
-                
             <% } %>
-            
             </section>
             <!-- PAGINATION (centered under the grid) -->
             <nav class="pagination" aria-label="Pagination navigation">
@@ -301,12 +536,12 @@ body {
                 <button>Next &raquo;</button>
             </nav>
         </div>
-        
-        <% 
-              String includePage = activeRole + "Portal.jsp";
-              RequestDispatcher rd = request.getRequestDispatcher(includePage);
-              rd.include(request, response);
-        %>  
     </div>
+    
+    <!-- FOOTER -->
+    <footer class="footer">
+         <p>&copy; 2025 BookNest. All Rights Reserved.</p>
+    </footer>
+
 </body>
 </html>
