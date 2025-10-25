@@ -173,5 +173,26 @@ public class ListingDao {
     	}
     }
     
+ // Get total number of listings for a seller
+    public int getTotalListingsBySeller(long sellerId) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT COUNT(l) FROM Listing l WHERE l.seller.id = :sellerId";
+            Query<Long> query = session.createQuery(hql, Long.class);
+            query.setParameter("sellerId", sellerId);
+            Long count = query.uniqueResult();
+            return count != null ? count.intValue() : 0;
+        }
+    }
+
+    // Get number of active listings for a seller
+    public int getActiveListingsBySeller(long sellerId) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT COUNT(l) FROM Listing l WHERE l.seller.id = :sellerId AND l.status = 'ACTIVE'";
+            Query<Long> query = session.createQuery(hql, Long.class);
+            query.setParameter("sellerId", sellerId);
+            Long count = query.uniqueResult();
+            return count != null ? count.intValue() : 0;
+        }
+    }
 
 }

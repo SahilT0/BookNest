@@ -20,7 +20,7 @@
             || selectedRole.equals("donor") || selectedRole.equals("admin"))) {
         activeRole = selectedRole;
         session.setAttribute("activeRole", selectedRole);
-        response.sendRedirect(selectedRole + "Portal.jsp");
+        response.sendRedirect(selectedRole + "Portal");
         return;
     }
     String bookType = request.getParameter("type");

@@ -92,4 +92,40 @@ public class UserDao {
             }
         }
     }
+    
+    // Add this method to check if a user has a role by role name (String)
+    public boolean hasRole(long userId, String roleName) {
+        try (Session session = sessionFactory.openSession()) {
+            // Query to count if user has that role
+            String hql = "SELECT count(r) FROM User u JOIN u.roles r WHERE u.id = :userId AND r.name = :roleName";
+            Query<Long> query = session.createQuery(hql, Long.class);
+            query.setParameter("userId", userId);
+            // Assuming Roles enum matches the roleName string (use enum if applicable)
+            query.setParameter("roleName", Roles.Rolename.valueOf(roleName.toUpperCase()));
+            Long count = query.getSingleResult();
+            return count != null && count > 0;
+        }
+    }
+    
+ // Add role to user if not already assigned
+    public void addRole(long userId, String roleName) {
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            User user = session.get(User.class, userId);
+            Roles role = session.createQuery("FROM Roles r WHERE r.name = :roleName", Roles.class)
+                    .setParameter("roleName", Roles.Rolename.valueOf(roleName.toUpperCase()))
+                    .uniqueResult();
+
+            if(user != null && role != null && !user.getRoles().contains(role)) {
+                user.getRoles().add(role);
+                session.update(user);
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) tx.rollback();
+            throw e;
+        }
+    }
 }

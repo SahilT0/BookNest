@@ -146,5 +146,58 @@ public class OrderDao {
             throw e;
         }
     }
+    
+ // Count of pending orders for given seller
+    public int getPendingOrdersCountBySeller(long sellerId) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT COUNT(o) FROM Order o WHERE o.buyer.id = :sellerId AND o.status = :pendingStatus";
+            Query<Long> query = session.createQuery(hql, Long.class);
+            query.setParameter("sellerId", sellerId);
+            query.setParameter("pendingStatus", Order.Status.PENDING);
+            Long count = query.uniqueResult();
+            return count != null ? count.intValue() : 0;
+        }
+    }
+
+    // Count of completed (delivered) orders for given seller
+    public int getCompletedOrdersCountBySeller(long sellerId) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT COUNT(o) FROM Order o WHERE o.buyer.id = :sellerId AND o.status = :deliveredStatus";
+            Query<Long> query = session.createQuery(hql, Long.class);
+            query.setParameter("sellerId", sellerId);
+            query.setParameter("deliveredStatus", Order.Status.DELIVERED);
+            Long count = query.uniqueResult();
+            return count != null ? count.intValue() : 0;
+        }
+    }
+
+    // Total earnings (sum of totalAmount) for delivered orders for given seller
+    public double getTotalEarningsBySeller(long sellerId) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT SUM(o.totalAmount) FROM Order o WHERE o.buyer.id = :sellerId AND o.status = :deliveredStatus";
+            Query<Double> query = session.createQuery(hql, Double.class);
+            query.setParameter("sellerId", sellerId);
+            query.setParameter("deliveredStatus", Order.Status.DELIVERED);
+            Double sum = query.uniqueResult();
+            return sum != null ? sum : 0.0;
+        }
+    }
+
+ // Get recent sales/orders limited by 'limit' parameter for given seller
+    public List<Order> getRecentSalesBySeller(long sellerId, int limit) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT DISTINCT o FROM Order o "
+                       + "JOIN o.order_items oi "
+                       + "JOIN oi.listing l "
+                       + "WHERE l.seller.id = :sellerId "
+                       + "ORDER BY o.created_At DESC";
+            Query<Order> query = session.createQuery(hql, Order.class);
+            query.setParameter("sellerId", sellerId);
+            query.setMaxResults(limit);
+            return query.getResultList();
+        }
+    }
+
+
 
 }
