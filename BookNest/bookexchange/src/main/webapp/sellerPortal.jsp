@@ -334,13 +334,13 @@
     <span class="action-icon"><i class="fa-solid fa-plus"></i></span>
     <div class="action-title">Create Listing</div>
     <div class="action-desc">Add a new book/product for sale.</div>
-    <a href="createListing.jsp" class="action-btn">Add New</a>
+    <a href="CreateListingServlet" class="action-btn">Add New</a>
   </div>
   <div class="action-card">
     <span class="action-icon"><i class="fa-solid fa-book"></i></span>
     <div class="action-title">My Listings</div>
     <div class="action-desc">See and manage all your listed books.</div>
-    <a href="myListings.jsp" class="action-btn">View All</a>
+    <a href="myListings" class="action-btn">View All</a>
   </div>
   <div class="action-card">
     <span class="action-icon"><i class="fa-solid fa-shopping-cart"></i></span>

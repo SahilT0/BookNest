@@ -195,4 +195,5 @@ public class Listing {
 	public void setReviewCount(int reviewCount) {
 		this.reviewCount = reviewCount;
 	}
+
 }

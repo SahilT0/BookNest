@@ -9,6 +9,7 @@ import org.hibernate.query.Query;
 
 import jakarta.persistence.NoResultException;
 import model.Book;
+import model.BookImage;
 
 public class BookDao {
 
@@ -148,6 +149,35 @@ public class BookDao {
             Query<String> query = session.createQuery(hql, String.class);
             query.setParameter("bookId", book.getId());
             return query.getResultList();
+        }
+    }
+    
+    public Book findBookByTitleAndAuthor(String title, String author) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "FROM Book WHERE title = :title AND author = :author";
+            Query<Book> query = session.createQuery(hql, Book.class);
+            query.setParameter("title", title);
+            query.setParameter("author", author);
+            try {
+                return query.getSingleResult();
+            } catch (NoResultException e) {
+                return null;
+            }
+        }
+    }
+    
+    public void saveBookImage(BookImage bookImage) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            session.persist(bookImage); // Use persist() for new entities
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Error saving book image: " + e.getMessage(), e);
         }
     }
 }
